@@ -1125,7 +1125,6 @@ namespace QDP
       return builder->CreateICmpEQ( vals.first , vals.second );
   }
 
-  
   llvm::Value* llvm_ne( llvm::Value* lhs , llvm::Value* rhs ) {
     auto vals = llvm_normalize_values(lhs,rhs);
     llvm::Type* args_type = vals.first->getType();
@@ -1134,8 +1133,6 @@ namespace QDP
     else
       return builder->CreateICmpNE( vals.first , vals.second );
   }
-
-  
 
   llvm::Value* llvm_ge( llvm::Value* lhs , llvm::Value* rhs ) {
     auto vals = llvm_normalize_values(lhs,rhs);

@@ -789,8 +789,23 @@ quarkContractXX(const PColorMatrix<T1,4>& s1, const PColorMatrix<T2,4>& s2)
   return d ; 
 }
 
-
-
+// Contraction for quark propagators
+// QuarkContract 
+//! dest  = QuarkContractXX(Qprop1,Qprop2)
+#if QDP_NC > 4
+  template<class T1, class T2>
+  inline typename BinaryReturn<PColorMatrix<T1,Nc>, PColorMatrix<T2,Nc>, FnQuarkContractXX>::Type_t
+  quarkContractXX(const PColorMatrix<T1,Nc>& s1, const PColorMatrix<T2,Nc>& s2)
+  {
+    typename BinaryReturn<PColorMatrix<T1,Nc>, PColorMatrix<T2,Nc>, FnQuarkContractXX>::Type_t  d;
+    
+    // not yet written 
+    QDPIO::cerr << __func__ << ": not written for Nc=" << Nc <<endl;
+    QDP_abort(1);
+    
+    return d ; 
+  }
+#endif
 
 // Output
 //! Ascii output

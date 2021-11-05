@@ -399,6 +399,7 @@ int main(int argc, char *argv[])
   pop(xml_out);
 
   /* test 28 */
+#if QDP_NC == 3
   gaussian(lqtmp1);
   gaussian(lqtmp2);
   push(xml_out,"CONTRACT_PROP");
@@ -407,6 +408,9 @@ int main(int argc, char *argv[])
   write(xml_out, "lqtmp23", quarkContract23(lqtmp1, lqtmp2));
   write(xml_out, "lqtmp24", quarkContract24(lqtmp1, lqtmp2));
   pop(xml_out);
+#else 
+#warning "Not building SU(3) baryon contractions" 
+#endif 
 
 #if 1
   /* test 29 */

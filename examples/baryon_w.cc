@@ -96,7 +96,7 @@ void baryon(const LatticePropagator& quark_propagator,
 
   if ( Ns != 4 || Nc != 3 )		/* Code is specific to Ns=4 and Nc=3. */
     return;
-
+#if QDP_NC == 3
   int t0 = t_source[j_decay];
   
   SpinMatrix Cgm;
@@ -229,4 +229,7 @@ void baryon(const LatticePropagator& quark_propagator,
 	barprop[baryons][t_eff] =  0.5 * Complex(hsum_a(baryons,t));
     }
   }
+#else
+#warning "Not building SU(3) baryon contractions"
+#endif
 }

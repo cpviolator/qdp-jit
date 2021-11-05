@@ -702,7 +702,7 @@ void checkSpinProjDir0Plus(const REAL* src, REAL *dst, unsigned int n_vec)
    *      ( d0r + i d0i )  =  ( {x0r - x3i} + i{x0i + x3r} )
    *      ( d1r + i d1i )     ( {x1r - x2i} + i{x1i + x2r} )
    */
-  REAL tmp_spinor[4][3][2];
+  REAL tmp_spinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -763,7 +763,7 @@ void checkSpinProjDir0Minus(const REAL* src, REAL *dst, unsigned int n_vec)
    *      ( b0r + i b0i )  =  ( {a0r + a3i} + i{a0i - a3r} )
    *      ( b1r + i b1i )     ( {a1r + a2i} + i{a1i - a2r} )
    */
-  REAL tmp_spinor[4][3][2];
+  REAL tmp_spinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -823,7 +823,7 @@ void checkSpinProjDir1Plus(const REAL* src, REAL *dst, unsigned int n_vec)
    *      ( b0r + i b0i )  =  ( {a0r - a3r} + i{a0i - a3i} )
    *      ( b1r + i b1i )     ( {a1r + a2r} + i{a1i + a2i} )
    */
-  REAL tmp_spinor[4][3][2];
+  REAL tmp_spinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -882,7 +882,7 @@ void checkSpinProjDir1Minus(const REAL* src, REAL *dst, unsigned int n_vec)
    *      ( b1r + i b1i )     ( {a1r - a2r} + i{a1i - a2i} )
    */
 
-  REAL tmp_spinor[4][3][2];
+  REAL tmp_spinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -943,7 +943,7 @@ void checkSpinProjDir2Plus(const REAL* src, REAL *dst, unsigned int n_vec)
    *      ( b1r + i b1i )     ( {a1r + a3i} + i{a1i - a3r} )
    */
 
-  REAL tmp_spinor[4][3][2];
+  REAL tmp_spinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1003,7 +1003,7 @@ void checkSpinProjDir2Minus(const REAL* src, REAL *dst, unsigned int n_vec)
    *      ( b1r + i b1i )     ( {a1r - a3i} + i{a1i + a3r} )
    */
 
-  REAL tmp_spinor[4][3][2];
+  REAL tmp_spinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1062,7 +1062,7 @@ void checkSpinProjDir3Plus(const REAL* src, REAL *dst, unsigned int n_vec)
    *      ( b1r + i b1i )     ( {a1r + a3r} + i{a1i + a3i} )
    */
 
-  REAL tmp_spinor[4][3][2];
+  REAL tmp_spinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1122,7 +1122,7 @@ void checkSpinProjDir3Minus(const REAL* src, REAL *dst, unsigned int n_vec)
    */
 
 
-  REAL tmp_spinor[4][3][2];
+  REAL tmp_spinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1172,7 +1172,7 @@ void checkSpinReconDir0Plus(const REAL* src, REAL *dst, unsigned int n_vec)
     *  ( b3r + i b3i )     ( {a3r + a0i} + i{a3i - a0r} )     ( b0i - i b0r ) 
    */
 
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1238,7 +1238,7 @@ void checkSpinReconDir0Minus(const REAL* src, REAL *dst, unsigned int n_vec)
     *   ( b3r + i b3i )     ( {a3r - a0i} + i{a3i + a0r} )     ( - b0i + i b0r ) 
     */
   
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1296,7 +1296,7 @@ void checkSpinReconDir1Plus(const REAL* src, REAL *dst, unsigned int n_vec)
 
 
 
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1362,7 +1362,7 @@ void checkSpinReconDir1Minus(const REAL* src, REAL *dst, unsigned int n_vec)
 #endif
 
   
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1434,7 +1434,7 @@ void checkSpinReconDir2Plus(const REAL* src, REAL *dst, unsigned int n_vec)
 
 
 
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1500,7 +1500,7 @@ void checkSpinReconDir2Minus(const REAL* src, REAL *dst, unsigned int n_vec)
 #endif
 
   
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1569,7 +1569,7 @@ void checkSpinReconDir3Plus(const REAL* src, REAL *dst, unsigned int n_vec)
 
 
 
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1636,7 +1636,7 @@ void checkSpinReconDir3Minus(const REAL* src, REAL *dst, unsigned int n_vec)
 #endif
 
   
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1712,7 +1712,7 @@ void checkAddSpinReconDir0Plus(const REAL* src, REAL *dst, unsigned int n_vec)
     *  ( b3r + i b3i )     ( {a3r + a0i} + i{a3i - a0r} )     ( b0i - i b0r ) 
    */
 
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1778,7 +1778,7 @@ void checkAddSpinReconDir0Minus(const REAL* src, REAL *dst, unsigned int n_vec)
     *   ( b3r + i b3i )     ( {a3r - a0i} + i{a3i + a0r} )     ( - b0i + i b0r ) 
     */
   
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1836,7 +1836,7 @@ void checkAddSpinReconDir1Plus(const REAL* src, REAL *dst, unsigned int n_vec)
 
 
 
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1902,7 +1902,7 @@ void checkAddSpinReconDir1Minus(const REAL* src, REAL *dst, unsigned int n_vec)
 #endif
 
   
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -1974,7 +1974,7 @@ void checkAddSpinReconDir2Plus(const REAL* src, REAL *dst, unsigned int n_vec)
 
 
 
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -2040,7 +2040,7 @@ void checkAddSpinReconDir2Minus(const REAL* src, REAL *dst, unsigned int n_vec)
 #endif
 
   
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -2109,7 +2109,7 @@ void checkAddSpinReconDir3Plus(const REAL* src, REAL *dst, unsigned int n_vec)
 
 
 
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;
@@ -2176,7 +2176,7 @@ void checkAddSpinReconDir3Minus(const REAL* src, REAL *dst, unsigned int n_vec)
 #endif
 
   
-  REAL tmp_hspinor[4][3][2];
+  REAL tmp_hspinor[4][Nc][2];
 
   const REAL* src_shadow = src;
   REAL* dst_shadow = dst;

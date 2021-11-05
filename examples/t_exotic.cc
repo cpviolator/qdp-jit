@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
 #if 1
   // Try out colorCrossProduct
   {
+#if QDP_NC == 3
     LatticeColorVector a,b;
     gaussian(a);
     gaussian(b);
@@ -92,6 +93,9 @@ int main(int argc, char *argv[])
     push(xml,"color_cross_product_gauge_transf");
     write(xml,"lc2", lc2);
     pop(xml);
+#else 
+#warning "Not building SU(3) cross product"
+#endif
   }
 #endif
 

@@ -1013,7 +1013,7 @@ namespace QDP {
 			     int mat_size)
   {
     size_t size = sizeof(REAL32);
-    size_t su3_size = size*mat_size;
+    size_t suN_size = size*mat_size;
     n_uint32_t checksum = 0;   // checksum
 
     multi1d<multi1d<ColorMatrix> > sa(Nd);   // extract gauge fields
@@ -1025,7 +1025,7 @@ namespace QDP {
 	QDP_extract(sa[dd], u[dd], all);
       }
 
-    char  *chk_buf = new(nothrow) char[su3_size];
+    char  *chk_buf = new(nothrow) char[suN_size];
     if( chk_buf == 0x0 ) { 
       QDP_error_exit("Unable to allocate chk_buf\n");
     }
@@ -1036,35 +1036,35 @@ namespace QDP {
 	  {
 	    switch (mat_size)
 	      {
-	      case 12:
+	      case 2*Nc*(Nc - 1):
 		{
-		  REAL32 su3[2][3][2];
+		  REAL32 suN[Nc-1][Nc][2];
 
 		  for(int kk=0; kk<Nc; kk++)      /* color */
 		    for(int ii=0; ii<2; ii++)    /* color */
 		      {
 			Complex sitecomp = peekColor(sa[dd][linear],ii,kk);
-			su3[ii][kk][0] = toFloat(Real(real(sitecomp)));
-			su3[ii][kk][1] = toFloat(Real(imag(sitecomp)));
+			suN[ii][kk][0] = toFloat(Real(real(sitecomp)));
+			suN[ii][kk][1] = toFloat(Real(imag(sitecomp)));
 		      }
 
-		  memcpy(chk_buf, &(su3[0][0][0]), su3_size);
+		  memcpy(chk_buf, &(suN[0][0][0]), suN_size);
 		}
 		break;
 
-	      case 18:
+	      case 2*Nc*Nc:
 		{
-		  REAL32 su3[3][3][2];
+		  REAL32 suN[Nc][Nc][2];
 
 		  for(int kk=0; kk<Nc; kk++)      /* color */
 		    for(int ii=0; ii<Nc; ii++)    /* color */
 		      {
 			Complex sitecomp = peekColor(sa[dd][linear],ii,kk);
-			su3[ii][kk][0] = toFloat(Real(real(sitecomp)));
-			su3[ii][kk][1] = toFloat(Real(imag(sitecomp)));
+			suN[ii][kk][0] = toFloat(Real(real(sitecomp)));
+			suN[ii][kk][1] = toFloat(Real(imag(sitecomp)));
 		      }
 
-		  memcpy(chk_buf, &(su3[0][0][0]), su3_size);
+		  memcpy(chk_buf, &(suN[0][0][0]), suN_size);
 		}
 		break;
 
@@ -1103,8 +1103,8 @@ namespace QDP {
 		  n_uint32_t& checksum, int mat_size, int float_size)
   {
     size_t size = float_size;
-    size_t su3_size = size*mat_size;
-    size_t tot_size = su3_size*Nd;
+    size_t suN_size = size*mat_size;
+    size_t tot_size = suN_size*Nd;
     const int nodeSites = Layout::sitesOnNode();
 
     char  *input = new(nothrow) char[tot_size*nodeSites];  // keep another copy in input buffers
@@ -1163,28 +1163,28 @@ namespace QDP {
 
     // Reconstruct the gauge field
     ColorMatrix  sitefield;
-    REAL su3[3][3][2];
+    REAL suN[Nc][Nc][2];
 
     for(int linear=0; linear < nodeSites; ++linear)
       {
 	for(int dd=0; dd<Nd; dd++)        /* dir */
 	  {
-	    // Transfer the data from input into SU3
+	    // Transfer the data from input into SUN
 	    if (float_size == 4) 
 	      {
-		REAL* su3_p = (REAL *)su3;
-		REAL32* input_p = (REAL32 *)( input+su3_size*(dd+Nd*linear) );
+		REAL* suN_p = (REAL *)suN;
+		REAL32* input_p = (REAL32 *)( input+suN_size*(dd+Nd*linear) );
 		for(int cp_index=0; cp_index < mat_size; cp_index++) {
-		  su3_p[cp_index] = (REAL)(input_p[cp_index]);
+		  suN_p[cp_index] = (REAL)(input_p[cp_index]);
 		}
 	      }
 	    else if (float_size == 8) 
 	      {
 		// IEEE64BIT case
-		REAL *su3_p = (REAL *)su3;
-		REAL64 *input_p = (REAL64 *)( input+su3_size*(dd+Nd*linear) );
+		REAL *suN_p = (REAL *)suN;
+		REAL64 *input_p = (REAL64 *)( input+suN_size*(dd+Nd*linear) );
 		for(int cp_index=0; cp_index < mat_size; cp_index++) { 
-		  su3_p[cp_index] = (REAL)input_p[cp_index];
+		  suN_p[cp_index] = (REAL)input_p[cp_index];
 		}
 	      }
 	    else { 
@@ -1193,30 +1193,33 @@ namespace QDP {
 	    }
 
 	    /* Reconstruct the third column  if necessary */
-	    if (mat_size == 12) 
+	    if (mat_size == 2*Nc*(Nc-1)) 
 	      {
-		su3[2][0][0] = su3[0][1][0]*su3[1][2][0] - su3[0][1][1]*su3[1][2][1]
-		  - su3[0][2][0]*su3[1][1][0] + su3[0][2][1]*su3[1][1][1];
-		su3[2][0][1] = su3[0][2][0]*su3[1][1][1] + su3[0][2][1]*su3[1][1][0]
-		  - su3[0][1][0]*su3[1][2][1] - su3[0][1][1]*su3[1][2][0];
+		suN[2][0][0] = suN[0][1][0]*suN[1][2][0] - suN[0][1][1]*suN[1][2][1]
+		  - suN[0][2][0]*suN[1][1][0] + suN[0][2][1]*suN[1][1][1];
+		suN[2][0][1] = suN[0][2][0]*suN[1][1][1] + suN[0][2][1]*suN[1][1][0]
+		  - suN[0][1][0]*suN[1][2][1] - suN[0][1][1]*suN[1][2][0];
 
-		su3[2][1][0] = su3[0][2][0]*su3[1][0][0] - su3[0][2][1]*su3[1][0][1]
-		  - su3[0][0][0]*su3[1][2][0] + su3[0][0][1]*su3[1][2][1];
-		su3[2][1][1] = su3[0][0][0]*su3[1][2][1] + su3[0][0][1]*su3[1][2][0]
-		  - su3[0][2][0]*su3[1][0][1] - su3[0][2][1]*su3[1][0][0];
+		suN[2][1][0] = suN[0][2][0]*suN[1][0][0] - suN[0][2][1]*suN[1][0][1]
+		  - suN[0][0][0]*suN[1][2][0] + suN[0][0][1]*suN[1][2][1];
+		suN[2][1][1] = suN[0][0][0]*suN[1][2][1] + suN[0][0][1]*suN[1][2][0]
+		  - suN[0][2][0]*suN[1][0][1] - suN[0][2][1]*suN[1][0][0];
           
-		su3[2][2][0] = su3[0][0][0]*su3[1][1][0] - su3[0][0][1]*su3[1][1][1]
-		  - su3[0][1][0]*su3[1][0][0] + su3[0][1][1]*su3[1][0][1];
-		su3[2][2][1] = su3[0][1][0]*su3[1][0][1] + su3[0][1][1]*su3[1][0][0]
-		  - su3[0][0][0]*su3[1][1][1] - su3[0][0][1]*su3[1][1][0];
+		suN[2][2][0] = suN[0][0][0]*suN[1][1][0] - suN[0][0][1]*suN[1][1][1]
+		  - suN[0][1][0]*suN[1][0][0] + suN[0][1][1]*suN[1][0][1];
+		suN[2][2][1] = suN[0][1][0]*suN[1][0][1] + suN[0][1][1]*suN[1][0][0]
+		  - suN[0][0][0]*suN[1][1][1] - suN[0][0][1]*suN[1][1][0];
 	      }
-
+            else {
+              QDP_error_exit("Unable to reconstrcut Nc column with Nc=%d build", Nc);
+            }
+            
 	    /* Copy into the big array */
 	    for(int kk=0; kk<Nc; kk++)      /* color */
 	      {
 		for(int ii=0; ii<Nc; ii++)    /* color */
 		  {
-		    Complex sitecomp = cmplx(Real(su3[ii][kk][0]), Real(su3[ii][kk][1]));
+		    Complex sitecomp = cmplx(Real(suN[ii][kk][0]), Real(suN[ii][kk][1]));
 		    pokeColor(sitefield,sitecomp,ii,kk);
 		  }
 	      }
@@ -1242,8 +1245,8 @@ namespace QDP {
 		   int mat_size)
   {
     size_t size = sizeof(REAL32);
-    size_t su3_size = size*mat_size;
-    size_t tot_size = su3_size*Nd;
+    size_t suN_size = size*mat_size;
+    size_t tot_size = suN_size*Nd;
     char *recv_buf = new(nothrow) char[tot_size];
     if( recv_buf == 0x0 ) { 
       QDP_error_exit("Unable to allocate recv_buf\n");
@@ -1274,36 +1277,36 @@ namespace QDP {
 
 	    for(int dd=0; dd<Nd; dd++)        /* dir */
 	      {
-		if ( mat_size == 12 ) 
+		if ( mat_size == 2*Nc*(Nc-1) ) 
 		  {
-		    REAL32 su3[2][3][2];
+		    REAL32 suN[Nc-1][Nc][2];
 
 		    for(int kk=0; kk<Nc; kk++)      /* color */
 		      for(int ii=0; ii<2; ii++)    /* color */
 			{
 			  Complex sitecomp = peekColor(sa[dd][linear],ii,kk);
-			  su3[ii][kk][0] = toFloat(Real(real(sitecomp)));
-			  su3[ii][kk][1] = toFloat(Real(imag(sitecomp)));
+			  suN[ii][kk][0] = toFloat(Real(real(sitecomp)));
+			  suN[ii][kk][1] = toFloat(Real(imag(sitecomp)));
 			}
 
-		    memcpy(recv_buf_tmp, &(su3[0][0][0]), su3_size);
+		    memcpy(recv_buf_tmp, &(suN[0][0][0]), suN_size);
 		  }
 		else
 		  {
-		    REAL32 su3[3][3][2];
+		    REAL32 suN[Nc][Nc][2];
 
 		    for(int kk=0; kk<Nc; kk++)      /* color */
 		      for(int ii=0; ii<Nc; ii++)    /* color */
 			{
 			  Complex sitecomp = peekColor(sa[dd][linear],ii,kk);
-			  su3[ii][kk][0] = toFloat(Real(real(sitecomp)));
-			  su3[ii][kk][1] = toFloat(Real(imag(sitecomp)));
+			  suN[ii][kk][0] = toFloat(Real(real(sitecomp)));
+			  suN[ii][kk][1] = toFloat(Real(imag(sitecomp)));
 			}
 
-		    memcpy(recv_buf_tmp, &(su3[0][0][0]), su3_size);
+		    memcpy(recv_buf_tmp, &(suN[0][0][0]), suN_size);
 		  }
 
-		recv_buf_tmp += su3_size;
+		recv_buf_tmp += suN_size;
 	      }
 	  }
 

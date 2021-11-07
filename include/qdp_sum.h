@@ -306,7 +306,7 @@ namespace QDP {
   
   template<class WT>
   typename UnaryReturn< OLattice<PScalar<PScalar<RScalar<Word<double> > > > > , FnSum>::Type_t
-  sum(const QDPExpr<UnaryNode<FnLocalNorm2, Reference<QDPType<PSpinVector<PColorVector<RComplex<Word<WT> >, 3>, 4>, OLattice<PSpinVector<PColorVector<RComplex<Word<WT> >, 3>, 4> > > > >,OLattice<PScalar<PScalar<RScalar<Word<double> > > > > >& rhs, const Subset& s)
+  sum(const QDPExpr<UnaryNode<FnLocalNorm2, Reference<QDPType<PSpinVector<PColorVector<RComplex<Word<WT> >, Nc>, 4>, OLattice<PSpinVector<PColorVector<RComplex<Word<WT> >, Nc>, 4> > > > >,OLattice<PScalar<PScalar<RScalar<Word<double> > > > > >& rhs, const Subset& s)
   {
     typedef typename UnaryReturn< OLattice< PScalar<PScalar<RScalar<Word<double> > > > > , FnSum>::Type_t::SubType_t T2;
     

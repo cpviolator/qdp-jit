@@ -67,7 +67,7 @@ n_uint32_t computeChecksum(const multi1d<LatticeColorMatrix>& u,
 			   int mat_size)
 {
   size_t size = sizeof(REAL32);
-  size_t su3_size = size*mat_size;
+  size_t suN_size = size*mat_size;
   n_uint32_t checksum = 0;   // checksum
   const int nodeSites = Layout::sitesOnNode();
 
@@ -79,7 +79,7 @@ n_uint32_t computeChecksum(const multi1d<LatticeColorMatrix>& u,
     QDP_extract(sa[dd], u[dd], all);
   }
 
-  char  *chk_buf = new(nothrow) char[su3_size];
+  char  *chk_buf = new(nothrow) char[suN_size];
   if( chk_buf == 0x0 ) { 
     QDP_error_exit("Unable to allocate chk_buf\n");
   }
@@ -90,35 +90,35 @@ n_uint32_t computeChecksum(const multi1d<LatticeColorMatrix>& u,
     {
       switch (mat_size)
       {
-      case 12:
+      case 2*Nc*(Nc - 1):
       {
-	REAL32 su3[2][3][2];
+	REAL32 suN[Nc-1][Nc][2];
 
 	for(int kk=0; kk<Nc; kk++)      /* color */
 	  for(int ii=0; ii<2; ii++)    /* color */
 	  {
 	    Complex sitecomp = peekColor(sa[dd][linear],ii,kk);
-	    su3[ii][kk][0] = toFloat(Real(real(sitecomp)));
-	    su3[ii][kk][1] = toFloat(Real(imag(sitecomp)));
-	  }
+            suN[ii][kk][0] = toFloat(Real(real(sitecomp)));
+            suN[ii][kk][1] = toFloat(Real(real(sitecomp)));
+          }
 
-	memcpy(chk_buf, &(su3[0][0][0]), su3_size);
+	memcpy(chk_buf, &(suN[0][0][0]), suN_size);
       }
       break;
 
-      case 18:
+      case 2*Nc*Nc:
       {
-	REAL32 su3[3][3][2];
+	REAL32 suN[Nc][Nc][2];
 
 	for(int kk=0; kk<Nc; kk++)      /* color */
 	  for(int ii=0; ii<Nc; ii++)    /* color */
 	  {
 	    Complex sitecomp = peekColor(sa[dd][linear],ii,kk);
-	    su3[ii][kk][0] = toFloat(Real(real(sitecomp)));
-	    su3[ii][kk][1] = toFloat(Real(imag(sitecomp)));
+	    suN[ii][kk][0] = toFloat(Real(real(sitecomp)));
+	    suN[ii][kk][1] = toFloat(Real(imag(sitecomp)));
 	  }
 
-	memcpy(chk_buf, &(su3[0][0][0]), su3_size);
+	memcpy(chk_buf, &(suN[0][0][0]), suN_size);
       }
       break;
 
@@ -154,13 +154,13 @@ void readArchiv(BinaryReader& cfg_in, multi1d<LatticeColorMatrix>& u,
 		n_uint32_t& checksum, int mat_size, int float_size)
 {
   ColorMatrix  sitefield;
-  char *su3_buffer;
+  char *suN_buffer;
 
-  REAL su3[Nc][Nc][2];
+  REAL suN[Nc][Nc][2];
   checksum = 0;
 
-  su3_buffer = new char[ Nc*Nc*2*float_size ];
-  if( su3_buffer == 0x0 ) { 
+  suN_buffer = new char[ Nc*Nc*2*float_size ];
+  if( suN_buffer == 0x0 ) { 
     QDP_error_exit("Unable to allocate input buffer\n");
   }
 
@@ -172,7 +172,7 @@ void readArchiv(BinaryReader& cfg_in, multi1d<LatticeColorMatrix>& u,
     for(int dd=0; dd<Nd; dd++)        /* dir */
     {
       /* Read an fe variable and write it to the BE */
-      cfg_in.readArray(su3_buffer, float_size, mat_size);
+      cfg_in.readArray(suN_buffer, float_size, mat_size);
 
       if (cfg_in.fail()) {
 	QDP_error_exit("Error reading configuration");
@@ -180,48 +180,51 @@ void readArchiv(BinaryReader& cfg_in, multi1d<LatticeColorMatrix>& u,
 
 
       // Compute checksum
-      n_uint32_t* chk_ptr = (n_uint32_t*)su3_buffer;
+      n_uint32_t* chk_ptr = (n_uint32_t*)suN_buffer;
       for(int i=0; i < mat_size*float_size/sizeof(n_uint32_t); ++i)
 	checksum += chk_ptr[i];
 
 
-      /* Transfer from input buffer to the actual su3 buffer, 
+      /* Transfer from input buffer to the actual suN buffer, 
 	 downcasting it to float if necessary */
       if ( float_size == 4 ) { 
-	REAL32 *su3_bufp = (REAL32 *)su3_buffer;
-	REAL *su3_p = (REAL *)su3;
+	REAL32 *suN_bufp = (REAL32 *)suN_buffer;
+	REAL *suN_p = (REAL *)suN;
 
 	for(int cp_index=0; cp_index < mat_size; cp_index++) { 
-	  su3_p[cp_index] = (REAL)su3_bufp[cp_index];
+	  suN_p[cp_index] = (REAL)suN_bufp[cp_index];
 	}
       }
       else if ( float_size == 8 ) {
-	REAL64 *su3_bufp = (REAL64 *)su3_buffer;
-	REAL  *su3_p = (REAL *)su3;
+	REAL64 *suN_bufp = (REAL64 *)suN_buffer;
+	REAL  *suN_p = (REAL *)suN;
 
 	for(int cp_index =0; cp_index < mat_size; cp_index++) { 
 	  
-	  su3_p[cp_index] = (REAL)su3_bufp[cp_index];
+	  suN_p[cp_index] = (REAL)suN_bufp[cp_index];
 	}
       }
 
       /* Reconstruct the third column  if necessary */
       if (mat_size == 12) 
       {
-	su3[2][0][0] = su3[0][1][0]*su3[1][2][0] - su3[0][1][1]*su3[1][2][1]
-	   	     - su3[0][2][0]*su3[1][1][0] + su3[0][2][1]*su3[1][1][1];
-	su3[2][0][1] = su3[0][2][0]*su3[1][1][1] + su3[0][2][1]*su3[1][1][0]
-		     - su3[0][1][0]*su3[1][2][1] - su3[0][1][1]*su3[1][2][0];
+	suN[2][0][0] = suN[0][1][0]*suN[1][2][0] - suN[0][1][1]*suN[1][2][1]
+	   	     - suN[0][2][0]*suN[1][1][0] + suN[0][2][1]*suN[1][1][1];
+	suN[2][0][1] = suN[0][2][0]*suN[1][1][1] + suN[0][2][1]*suN[1][1][0]
+		     - suN[0][1][0]*suN[1][2][1] - suN[0][1][1]*suN[1][2][0];
 
-	su3[2][1][0] = su3[0][2][0]*su3[1][0][0] - su3[0][2][1]*su3[1][0][1]
-		     - su3[0][0][0]*su3[1][2][0] + su3[0][0][1]*su3[1][2][1];
-	su3[2][1][1] = su3[0][0][0]*su3[1][2][1] + su3[0][0][1]*su3[1][2][0]
-		     - su3[0][2][0]*su3[1][0][1] - su3[0][2][1]*su3[1][0][0];
+	suN[2][1][0] = suN[0][2][0]*suN[1][0][0] - suN[0][2][1]*suN[1][0][1]
+		     - suN[0][0][0]*suN[1][2][0] + suN[0][0][1]*suN[1][2][1];
+	suN[2][1][1] = suN[0][0][0]*suN[1][2][1] + suN[0][0][1]*suN[1][2][0]
+		     - suN[0][2][0]*suN[1][0][1] - suN[0][2][1]*suN[1][0][0];
           
-	su3[2][2][0] = su3[0][0][0]*su3[1][1][0] - su3[0][0][1]*su3[1][1][1]
-		     - su3[0][1][0]*su3[1][0][0] + su3[0][1][1]*su3[1][0][1];
-	su3[2][2][1] = su3[0][1][0]*su3[1][0][1] + su3[0][1][1]*su3[1][0][0]
-		     - su3[0][0][0]*su3[1][1][1] - su3[0][0][1]*su3[1][1][0];
+	suN[2][2][0] = suN[0][0][0]*suN[1][1][0] - suN[0][0][1]*suN[1][1][1]
+		     - suN[0][1][0]*suN[1][0][0] + suN[0][1][1]*suN[1][0][1];
+	suN[2][2][1] = suN[0][1][0]*suN[1][0][1] + suN[0][1][1]*suN[1][0][0]
+		     - suN[0][0][0]*suN[1][1][1] - suN[0][0][1]*suN[1][1][0];
+      }
+      else {
+        QDP_error_exit("Error writing with mat_size = %d for Nc=%d not suppoted", mat_size, Nc);
       }
 
       /* Copy into the big array */
@@ -229,8 +232,8 @@ void readArchiv(BinaryReader& cfg_in, multi1d<LatticeColorMatrix>& u,
       {
 	for(int ii=0; ii<Nc; ii++)    /* color */
 	{
-	  Real re = su3[ii][kk][0];
-	  Real im = su3[ii][kk][1];
+	  Real re = suN[ii][kk][0];
+	  Real im = suN[ii][kk][1];
 	  Complex sitecomp = cmplx(re,im);
 	  pokeColor(sitefield,sitecomp,ii,kk);
 	}
@@ -239,7 +242,7 @@ void readArchiv(BinaryReader& cfg_in, multi1d<LatticeColorMatrix>& u,
       pokeSite(u[dd], sitefield, coord);
     }
   }
-  delete [] su3_buffer;
+  delete [] suN_buffer;
 }
 
 
@@ -257,7 +260,7 @@ void writeArchiv(BinaryWriter& cfg_out, const multi1d<LatticeColorMatrix>& u,
 		 int mat_size)
 {
   ColorMatrix  sitefield;
-  float su3[3][3][2];
+  float suN[Nc][Nc][2];
 
   // Find the location of each site and send to primary node
   for(int site=0; site < Layout::vol(); ++site)
@@ -268,14 +271,14 @@ void writeArchiv(BinaryWriter& cfg_out, const multi1d<LatticeColorMatrix>& u,
     {
       sitefield = peekSite(u[dd], coord);
 
-      if ( mat_size == 12 ) 
+      if ( mat_size == 2*Nc*(Nc - 1) ) 
       {
 	for(int kk=0; kk < Nc; kk++)      /* color */
 	  for(int ii=0; ii < Nc-1; ii++)    /* color */
 	  {
 	    Complex sitecomp = peekColor(sitefield,ii,kk);
-	    su3[ii][kk][0] = toFloat(Real(real(sitecomp)));
-	    su3[ii][kk][1] = toFloat(Real(imag(sitecomp)));
+	    suN[ii][kk][0] = toFloat(Real(real(sitecomp)));
+	    suN[ii][kk][1] = toFloat(Real(imag(sitecomp)));
 	  }
       }
       else
@@ -284,13 +287,13 @@ void writeArchiv(BinaryWriter& cfg_out, const multi1d<LatticeColorMatrix>& u,
 	  for(int ii=0; ii < Nc; ii++)    /* color */
 	  {
 	    Complex sitecomp = peekColor(sitefield,ii,kk);
-	    su3[ii][kk][0] = toFloat(Real(real(sitecomp)));
-	    su3[ii][kk][1] = toFloat(Real(imag(sitecomp)));
+	    suN[ii][kk][0] = toFloat(Real(real(sitecomp)));
+	    suN[ii][kk][1] = toFloat(Real(imag(sitecomp)));
 	  }
       }
 
       // Write a site variable
-      cfg_out.writeArray((char *)&(su3[0][0][0]),sizeof(float), mat_size);
+      cfg_out.writeArray((char *)&(suN[0][0][0]),sizeof(float), mat_size);
     }
   }
 

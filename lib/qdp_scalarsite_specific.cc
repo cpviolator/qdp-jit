@@ -104,7 +104,6 @@ SpinMatrix Gamma(int num)
       QDPIO::cerr << "Gamma algebra requires Ns == 4" << std::endl;
       QDP_abort(1);
     }
-  QDPIO::cout << "Using gamma_data fo sho... \n" << std::endl;
   SpinMatrix g;
   
   for ( int i = 0 ; i < 4 ; ++i )
